@@ -4,10 +4,14 @@ import com.kaoutar.testSpring.dto.FournisseurDTO;
 import com.kaoutar.testSpring.mapper.FournisseurMapper;
 import com.kaoutar.testSpring.model.Fournisseur;
 import com.kaoutar.testSpring.reposetry.FournisseurRepository;
+import org.mapstruct.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 @Service
 public class FournisseurService {
 
@@ -19,10 +23,30 @@ public class FournisseurService {
          this.mapper = mapper;
      }
 
-public FournisseurDTO convertToDto(Fournisseur entity){return mapper.toDto(entity);}
 
-    public Fournisseur save(Fournisseur f) { return repo.save(f); }
-    public List<Fournisseur> getAll() { return repo.findAll(); }
-    public Fournisseur getById(Long id) { return repo.findById(id).orElse(null); }
-    public void delete(Long id) { repo.deleteById(id); }
+    public FournisseurDTO save(FournisseurDTO f) {
+         Fournisseur savedntity= repo.save(mapper.toEntity(f));
+         return  mapper.toDto(savedntity);
+     }
+
+
+    public List<FournisseurDTO> getAllFournisseur() {
+         List<Fournisseur> fournisseurs= repo.findAll();
+        return fournisseurs.stream().map(f->mapper.toDto(f) ).collect(Collectors.toList())  ;
+     }
+
+     public  FournisseurDTO updateFournisseur(Long id , FournisseurDTO fournisseurDTO){
+          Optional<Fournisseur> fournisseurById= repo.findById(id);
+          Fournisseur fournisseurUpdate= repo.save(fournisseurById.get());
+          return mapper.toDto(fournisseurUpdate);
+     }
+
+    public String deleteFournisseur(Long id) {
+         Optional<Fournisseur> fournisseurById=repo.findById(id);
+         if(fournisseurById.isPresent()){
+             repo.delete(fournisseurById.get());
+             return "delete with succes";
+         }
+         return "supplier don't exist";
+    }
 }

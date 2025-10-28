@@ -1,35 +1,37 @@
 package com.kaoutar.testSpring.controller;
 
+import com.kaoutar.testSpring.dto.FournisseurDTO;
 import com.kaoutar.testSpring.model.Fournisseur;
 import com.kaoutar.testSpring.service.FournisseurService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController("/Fournisseurs")
+@RestController
+@RequiredArgsConstructor
+
+@RequestMapping("/api/fournisseurs")
 public class FournisseurController {
    private  final FournisseurService  fournisseurService;
-    @Autowired
-    public FournisseurController(FournisseurService fournisseurService) {
-        this.fournisseurService = fournisseurService;
-    }
+
     @PostMapping
-    public Fournisseur create(@RequestBody Fournisseur f) { return fournisseurService.save(f); }
-
-    @GetMapping
-    public List<Fournisseur> all() { return fournisseurService.getAll(); }
-
-    @GetMapping("/{id}")
-    public Fournisseur get(@PathVariable Long id) { return fournisseurService.getById(id); }
-
-    @PutMapping("/{id}")
-    public Fournisseur update(@PathVariable Long id, @RequestBody Fournisseur f) {
-        f.setId(id);
-        return fournisseurService.save(f);
+    public ResponseEntity<FournisseurDTO> create(@Valid @RequestBody FournisseurDTO f) {
+        FournisseurDTO saved=fournisseurService.save(f);
+        return ResponseEntity.ok(saved);
     }
+    @GetMapping
+    public List<FournisseurDTO> getAllFournisseur(){return fournisseurService.getAllFournisseur();}
+    @PutMapping
+    public  ResponseEntity<FournisseurDTO> Update(@PathVariable Long id, @Valid @RequestBody FournisseurDTO fournisseur){
+        FournisseurDTO updated= fournisseurService.updateFournisseur(id,fournisseur);
+        return ResponseEntity.ok(updated);
+    }
+    @DeleteMapping
+    public  String delete(@PathVariable Long id){return  fournisseurService.deleteFournisseur(id);}
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) { fournisseurService.delete(id); }
 }

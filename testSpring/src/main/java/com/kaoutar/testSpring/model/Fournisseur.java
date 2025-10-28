@@ -3,8 +3,14 @@ package com.kaoutar.testSpring.model;
 
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.*;
-
-
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 @Entity
 public class Fournisseur {
     @Id
@@ -26,78 +32,7 @@ public class Fournisseur {
     @Column
     private String ice;
 
-    public Fournisseur(Long id, String ice, String ville, String telephone, String email, String contact, String adresse, String societe) {
-        this.id = id;
-        this.ice = ice;
-        this.ville = ville;
-        this.telephone = telephone;
-        this.email = email;
-        this.contact = contact;
-        this.adresse = adresse;
-        this.societe = societe;
-    }
 
-    public Long getId() {
-        return id;
-    }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
 
-    public String getSociete() {
-        return societe;
-    }
-
-    public void setSociete(String societe) {
-        this.societe = societe;
-    }
-
-    public String getAdresse() {
-        return adresse;
-    }
-
-    public void setAdresse(String adresse) {
-        this.adresse = adresse;
-    }
-
-    public String getContact() {
-        return contact;
-    }
-
-    public void setContact(String contact) {
-        this.contact = contact;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getTelephone() {
-        return telephone;
-    }
-
-    public void setTelephone(String telephone) {
-        this.telephone = telephone;
-    }
-
-    public String getVille() {
-        return ville;
-    }
-
-    public void setVille(String ville) {
-        this.ville = ville;
-    }
-
-    public String getIce() {
-        return ice;
-    }
-
-    public void setIce(String ice) {
-        this.ice = ice;
-    }
 }

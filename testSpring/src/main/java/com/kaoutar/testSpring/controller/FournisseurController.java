@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
+@RestController("/Fournisseurs")
 public class FournisseurController {
    private  final FournisseurService  fournisseurService;
     @Autowired

@@ -4,6 +4,7 @@ import com.kaoutar.testSpring.dto.FournisseurDTO;
 import com.kaoutar.testSpring.mapper.FournisseurMapper;
 import com.kaoutar.testSpring.model.Fournisseur;
 import com.kaoutar.testSpring.reposetry.FournisseurRepository;
+import lombok.AllArgsConstructor;
 import org.mapstruct.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,16 +14,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class FournisseurService {
 
     private final FournisseurRepository repo;
     private  final FournisseurMapper mapper;
-     @Autowired
-    public FournisseurService(FournisseurRepository repository, FournisseurMapper mapper) {
-        this.repo = repository;
-         this.mapper = mapper;
-     }
-
 
     public FournisseurDTO save(FournisseurDTO f) {
          Fournisseur savedntity= repo.save(mapper.toEntity(f));
@@ -48,5 +44,9 @@ public class FournisseurService {
              return "delete with succes";
          }
          return "supplier don't exist";
+    }
+
+    public FournisseurDTO getFournisseurById(Long id) {
+        return mapper.toDto(repo.findById(id).get());
     }
 }

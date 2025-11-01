@@ -1,4 +1,4 @@
 package com.kaoutar.testSpring.controller;
 
-public class Commande {
+public class CommandeController {
 }

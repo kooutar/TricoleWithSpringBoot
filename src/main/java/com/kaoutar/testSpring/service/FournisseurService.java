@@ -49,4 +49,19 @@ public class FournisseurService {
          }
          return "supplier don't exist";
     }
+    // ✅ Trouver par ID
+
+    public FournisseurDTO getFournisseurById(Long id) {
+        Fournisseur fournisseur = repo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Fournisseur non trouvé avec l'ID : " + id));
+        return mapper.toDto(fournisseur);
+    }
+
+    // ✅ Trouver par email
+
+   /* public FournisseurDTO getFournisseurByEmail(String email) {
+        Fournisseur fournisseur = repo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Fournisseur non trouvé avec l'email : " + email));
+        return mapper.toDto(fournisseur);
+    }*/
 }

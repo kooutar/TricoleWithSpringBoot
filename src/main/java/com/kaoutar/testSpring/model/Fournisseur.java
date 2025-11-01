@@ -7,6 +7,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -31,8 +34,8 @@ public class Fournisseur {
     private String ville;
     @Column
     private String ice;
-
-
+    @OneToMany(mappedBy = "fournisseur", cascade = CascadeType.ALL)
+    private List<Commande> commandeList;
 
 
 }

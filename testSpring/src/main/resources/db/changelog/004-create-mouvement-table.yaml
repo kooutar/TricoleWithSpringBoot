@@ -1,10 +1,10 @@
 databaseChangeLog:
   - changeSet:
-      id: 3
+      id: 4
       author: kaoutar
       changes:
         - createTable:
-            tableName: commande
+            tableName: mouvement
             columns:
               - column:
                   name: id
@@ -14,33 +14,35 @@ databaseChangeLog:
                     nullable: false
 
               - column:
-                  name: date_commande
-                  type: DATETIME
-                  constraints:
-                    nullable: true
-
-              - column:
                   name: statut
                   type: VARCHAR(255)
                   constraints:
-                    nullable: true
+                    nullable: false
 
               - column:
-                  name: montant_total
-                  type: DOUBLE
-                  constraints:
-                    nullable: true
-
-              - column:
-                  name: quntite
+                  name: quantite
                   type: INT
                   constraints:
                     nullable: true
 
               - column:
-                  name: fournisseur_id
+                  name: date_mouvement
+                  type: DATETIME
+                  constraints:
+                    nullable: true
+
+              - column:
+                  name: commande_id
                   type: BIGINT
                   constraints:
                     nullable: true
-                    foreignKeyName: fk_commande_fournisseur
-                    references: fournisseur(id)
+                    foreignKeyName: fk_mouvement_commande
+                    references: commande(id)
+
+              - column:
+                  name: produit_id
+                  type: BIGINT
+                  constraints:
+                    nullable: true
+                    foreignKeyName: fk_mouvement_produit
+                    references: produit(id)

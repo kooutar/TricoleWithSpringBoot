@@ -24,14 +24,21 @@ public class FournisseurController {
         FournisseurDTO saved=fournisseurService.save(f);
         return ResponseEntity.ok(saved);
     }
+
+
     @GetMapping
     public List<FournisseurDTO> getAllFournisseur(){return fournisseurService.getAllFournisseur();}
-    @PutMapping
-    public  ResponseEntity<FournisseurDTO> Update(@PathVariable Long id, @Valid @RequestBody FournisseurDTO fournisseur){
+
+    @GetMapping("/{id}")
+    public FournisseurDTO GetFournisseurById(@PathVariable Long id){return  fournisseurService.getFournisseurById(id);}
+
+    @PutMapping("/{id}")
+    public  ResponseEntity <FournisseurDTO> Update(@PathVariable Long id, @Valid @RequestBody FournisseurDTO fournisseur){
         FournisseurDTO updated= fournisseurService.updateFournisseur(id,fournisseur);
         return ResponseEntity.ok(updated);
     }
-    @DeleteMapping
+
+    @DeleteMapping("/{id}")
     public  String delete(@PathVariable Long id){return  fournisseurService.deleteFournisseur(id);}
 
 }

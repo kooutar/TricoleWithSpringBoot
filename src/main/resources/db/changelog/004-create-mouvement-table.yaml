@@ -1,0 +1,48 @@
+databaseChangeLog:
+  - changeSet:
+      id: 4
+      author: kaoutar
+      changes:
+        - createTable:
+            tableName: mouvement
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT AUTO_INCREMENT
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: statut
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: quantite
+                  type: INT
+                  constraints:
+                    nullable: true
+
+              - column:
+                  name: date_mouvement
+                  type: DATETIME
+                  constraints:
+                    nullable: true
+
+              - column:
+                  name: commande_id
+                  type: BIGINT
+                  constraints:
+                    nullable: true
+                    foreignKeyName: fk_mouvement_commande
+                    references: commande(id)
+
+              - column:
+                  name: produit_id
+                  type: BIGINT
+                  constraints:
+                    nullable: true
+                    foreignKeyName: fk_mouvement_produit
+                    references: produit(id)

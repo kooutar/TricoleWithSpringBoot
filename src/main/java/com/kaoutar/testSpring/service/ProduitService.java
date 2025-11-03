@@ -28,17 +28,21 @@ public class ProduitService {
 
 
     public List<ProduitDTO> getAllProduit() {
-        List<Produit> Produits= repo.findAll();
-        return Produits.stream().map(mapper::toDto).collect(Collectors.toList())  ;
+        List<Produit> produits = repo.findAll();
+        return produits.stream()
+                .map(produit -> {
+                    return mapper.toDto(produit);
+                })
+                .collect(Collectors.toList());
     }
 
     public  ProduitDTO updateProduit(Long id , ProduitDTO ProduitDTO){
-        Optional<Produit> ProduitById= repo.findById(id);
-        if(ProduitById.isPresent()){
-            Produit ProduitUpdate= repo.save(ProduitById.get());
-            return mapper.toDto(ProduitUpdate);
-        }
-        return  null;
+        Optional<Produit> ProduitById= Optional.ofNullable(repo.findById(id).orElseThrow(() -> new RuntimeException("produit non trouvé avec l'ID : " + id)));
+
+        mapper.UpdateProduitFromDTO(ProduitDTO, ProduitById.get());
+
+        Produit updated = repo.save(ProduitById.get());
+        return mapper.toDto(updated);
     }
 
     public String deleteProduit(Long id) {
@@ -48,5 +52,10 @@ public class ProduitService {
             return "delete with succes";
         }
         return "product don't exist";
+    }
+
+    public ProduitDTO getProduitById(Long id) {
+        Optional<Produit> produitById = repo.findById(id);
+        return produitById.map(mapper::toDto).orElse(null);
     }
 }

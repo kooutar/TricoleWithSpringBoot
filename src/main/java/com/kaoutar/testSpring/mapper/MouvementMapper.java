@@ -1,21 +1,37 @@
 package com.kaoutar.testSpring.mapper;
 
+
 import com.kaoutar.testSpring.dto.MouvementDTO;
 import com.kaoutar.testSpring.model.Mouvement;
-import com.kaoutar.testSpring.model.Commande;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
+
+import org.mapstruct.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface MouvementMapper {
-     @Mapping(source = "produitId" , target = "produit.id")
-     @Mapping(source = "commandeId" , target = "commande.id")
-     @Mapping(source = "produitNom", target = "produit.nom")
-     Mouvement toEntity(MouvementDTO dto);
-     @Mapping( source = "produit.id", target = "produitId")
-     @Mapping( source = "commande.id", target = "commandeId")
-     @Mapping( source = "produit.nom", target = "produitNom")
-     MouvementDTO toDTO(Mouvement entity);
 
+    @Mappings({
+            @Mapping(source = "commande.id", target = "commandeId"),
+            @Mapping(source = "produit.id", target = "produitId"),
+            @Mapping(source = "produit.nom", target = "produitNom")
+    })
+    MouvementDTO toDto(Mouvement entity);
+
+    List<MouvementDTO> toDtoList(List<Mouvement> entities);
+
+    @Mappings({
+            @Mapping(target = "commande", ignore = true),
+            @Mapping(target = "produit", ignore = true),
+            @Mapping(target = "dateMouvement", ignore = true)
+    })
+    Mouvement toEntity(MouvementDTO dto);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "commande", ignore = true)
+    @Mapping(target = "produit", ignore = true)
+    void UpdateMouvementFromDTO(MouvementDTO dto, @MappingTarget Mouvement entity);
 }
+    
+

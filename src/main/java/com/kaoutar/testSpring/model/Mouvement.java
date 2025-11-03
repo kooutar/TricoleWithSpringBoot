@@ -1,5 +1,6 @@
 package com.kaoutar.testSpring.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.kaoutar.testSpring.enums.StatutMouvement;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -29,6 +30,7 @@ public class Mouvement {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "commande_id")
+    @JsonBackReference
     private Commande commande;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -20,7 +20,8 @@ public class CommandeDTO {
     private Double totalCommande;
     private Integer quntite;
     private Long fournisseurId;
-    private String fournisseurNom; // Ajouter ce champ
-    private List<MouvementDTO> mouvements; // Ajouter ce champ
+    private String fournisseurNom;
+    private List<MouvementDTO> mouvements;
+
 
 }

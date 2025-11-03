@@ -9,6 +9,7 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
@@ -24,6 +25,8 @@ public class Produit {
     private Double prix_unitaire;
     private String categorie;
     private String  description;
+    private Integer qnte_stock;
+
 
     // Relation Many-to-Many via Mouvement
     @OneToMany(mappedBy = "produit", cascade = CascadeType.ALL)

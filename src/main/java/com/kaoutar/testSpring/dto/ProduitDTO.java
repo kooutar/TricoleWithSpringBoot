@@ -18,6 +18,7 @@ public class ProduitDTO {
     private Double prix_unitaire;
     private String categorie;
     private String description;
+    private Integer qnte_stock;
 
 
 

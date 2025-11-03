@@ -43,4 +43,12 @@ public class ProduitController {
         String result = produitService.deleteProduit(id);
         return ResponseEntity.ok(result);
     }
+
+    @GetMapping("/search/{nom}")
+    public ResponseEntity<ProduitDTO> getProduitByName(@PathVariable String nom) {
+        ProduitDTO produit = produitService.getProduitByName(nom);
+        return ResponseEntity.ok(produit);
+    }
+
+
 }

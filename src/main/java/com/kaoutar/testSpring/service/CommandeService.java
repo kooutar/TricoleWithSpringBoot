@@ -22,17 +22,14 @@ public class CommandeService {
     public CommandeDTO createCommande(CommandeDTO commandeDTO) {
         try {
             Commande commande = commandeMapper.toEntity(commandeDTO);
-            // Initialiser la liste des mouvements si elle est null
-            if (commande.getMouvements() == null) {
-                commande.setMouvements(new ArrayList<>());
-            }
             Commande savedCommande = commandeRepository.save(commande);
-            // Pour éviter les problèmes de chargement
             return commandeMapper.toDto(savedCommande);
         } catch (Exception e) {
             throw new RuntimeException("Erreur lors de la création de la commande: " + e.getMessage());
         }
     }
+
+
 
 
     public List<CommandeDTO> getAllCommandes() {

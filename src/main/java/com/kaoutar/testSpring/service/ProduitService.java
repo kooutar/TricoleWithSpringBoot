@@ -58,4 +58,12 @@ public class ProduitService {
         Optional<Produit> produitById = repo.findById(id);
         return produitById.map(mapper::toDto).orElse(null);
     }
+
+    public ProduitDTO getProduitByName(String nom) {
+        return repo.findByNom(nom)
+                .map(mapper::toDto)
+                .orElseThrow(() -> new RuntimeException("Produit non trouvé avec le nom : " + nom));
+    }
+
+
 }

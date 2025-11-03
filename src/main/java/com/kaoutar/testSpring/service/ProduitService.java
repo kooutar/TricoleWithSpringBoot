@@ -22,8 +22,15 @@ public class ProduitService {
 
 
     public ProduitDTO save(ProduitDTO f) {
-        Produit savedEntity= repo.save(mapper.toEntity(f));
-        return  mapper.toDto(savedEntity);
+        ProduitDTO produitByName = getProduitByName(f.getNom()); // find entity
+        if(produitByName != null){
+            Integer newQnte = produitByName.getQnte_stock() + f.getQnte_stock();
+            produitByName.setQnte_stock(newQnte);
+            Produit updated = repo.save(mapper.toEntity(produitByName)); // **save updated entity**
+            return mapper.toDto(updated);
+        }
+        Produit savedEntity = repo.save(mapper.toEntity(f));
+        return mapper.toDto(savedEntity);
     }
 
 
@@ -62,7 +69,7 @@ public class ProduitService {
     public ProduitDTO getProduitByName(String nom) {
         return repo.findByNom(nom)
                 .map(mapper::toDto)
-                .orElseThrow(() -> new RuntimeException("Produit non trouvé avec le nom : " + nom));
+                .orElse(null);
     }
 
 

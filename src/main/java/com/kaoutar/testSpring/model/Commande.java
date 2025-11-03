@@ -1,5 +1,6 @@
 package com.kaoutar.testSpring.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.kaoutar.testSpring.enums.StatusCommande;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -16,6 +17,8 @@ public class Commande {
 
     private int quntite;
     private LocalDate date_commande;
+    private Double montant_total;
+    @Enumerated(EnumType.STRING)
     private StatusCommande statut =StatusCommande.ENTREE;
 
     @ManyToOne
@@ -23,8 +26,7 @@ public class Commande {
     private Fournisseur fournisseur;
 
     @OneToMany(mappedBy = "commande", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Mouvement> mouvements = new ArrayList<>();
-    @ManyToOne
-    @JoinColumn(name = "produit_id")
-    private Produit produit;
+
 }

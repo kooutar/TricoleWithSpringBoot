@@ -36,9 +36,14 @@ public class FournisseurService {
      }
 
      public  FournisseurDTO updateFournisseur(Long id , FournisseurDTO fournisseurDTO){
-          Optional<Fournisseur> fournisseurById= repo.findById(id);
-          Fournisseur fournisseurUpdate= repo.save(fournisseurById.get());
-          return mapper.toDto(fournisseurUpdate);
+         Fournisseur fournisseur = repo.findById(id)
+                 .orElseThrow(() -> new RuntimeException("Fournisseur non trouvé avec l'ID : " + id));
+
+         // ✅ MapStruct met à jour uniquement les champs du DTO
+         mapper.updateFournisseurFromDto(fournisseurDTO, fournisseur);
+
+         Fournisseur updated = repo.save(fournisseur);
+         return mapper.toDto(updated);
      }
 
     public String deleteFournisseur(Long id) {

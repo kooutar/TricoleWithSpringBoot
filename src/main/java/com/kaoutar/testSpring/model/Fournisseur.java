@@ -35,7 +35,7 @@ public class Fournisseur {
     @Column
     private String ice;
     @OneToMany(mappedBy = "fournisseur", cascade = CascadeType.ALL)
-    private List<Commande> commandeList;
+    private List<Commande> commandes;
 
 
 }

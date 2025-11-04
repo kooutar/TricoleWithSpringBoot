@@ -26,6 +26,7 @@ public class Produit {
     private String categorie;
     private String  description;
     private Integer qnte_stock;
+    private Integer prix_construction;
 
 
     // Relation Many-to-Many via Mouvement

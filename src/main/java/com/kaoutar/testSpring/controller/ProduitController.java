@@ -45,9 +45,9 @@ public class ProduitController {
     }
 
     @GetMapping("/search/{nom}")
-    public ResponseEntity<ProduitDTO> getProduitByName(@PathVariable String nom) {
-        ProduitDTO produit = produitService.getProduitByName(nom);
-        return ResponseEntity.ok(produit);
+    public List<ProduitDTO> getProduitByName(@PathVariable String nom) {
+        return produitService.getProduitByName(nom);
+
     }
 
 

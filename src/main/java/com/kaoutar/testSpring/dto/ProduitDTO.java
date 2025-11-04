@@ -17,6 +17,7 @@ public class ProduitDTO {
     private String categorie;
     private String description;
     private Integer qnte_stock;
+    private  Integer prix_construction;
 
 
 

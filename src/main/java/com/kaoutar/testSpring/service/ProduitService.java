@@ -8,8 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 @Service
 public class ProduitService {
     private final ProduitRepository repo;
@@ -20,13 +22,20 @@ public class ProduitService {
         this.mapper = mapper;
     }
 
-
     public ProduitDTO save(ProduitDTO f) {
-        ProduitDTO produitByName = getProduitByName(f.getNom()); // find entity
-        if(produitByName != null){
+
+        List<ProduitDTO> produits = getProduitByName(f.getNom());
+
+        Optional<ProduitDTO> existingProduit = produits.stream()
+                .filter(p -> Objects.equals(p.getPrix_unitaire(), f.getPrix_unitaire()))
+                .findFirst();
+
+        if (existingProduit.isPresent()) {
+            ProduitDTO produitByName = existingProduit.get();
             Integer newQnte = produitByName.getQnte_stock() + f.getQnte_stock();
             produitByName.setQnte_stock(newQnte);
-            Produit updated = repo.save(mapper.toEntity(produitByName)); // **save updated entity**
+
+            Produit updated = repo.save(mapper.toEntity(produitByName));
             return mapper.toDto(updated);
         }
         Produit savedEntity = repo.save(mapper.toEntity(f));
@@ -37,9 +46,7 @@ public class ProduitService {
     public List<ProduitDTO> getAllProduit() {
         List<Produit> produits = repo.findAll();
         return produits.stream()
-                .map(produit -> {
-                    return mapper.toDto(produit);
-                })
+                .map(mapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -66,10 +73,10 @@ public class ProduitService {
         return produitById.map(mapper::toDto).orElse(null);
     }
 
-    public ProduitDTO getProduitByName(String nom) {
+    public List<ProduitDTO> getProduitByName(String nom) {
         return repo.findByNom(nom)
                 .map(mapper::toDto)
-                .orElse(null);
+                .stream().collect(Collectors.toList());
     }
 
 

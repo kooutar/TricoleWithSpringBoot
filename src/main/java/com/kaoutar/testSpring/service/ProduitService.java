@@ -1,45 +1,68 @@
 package com.kaoutar.testSpring.service;
 
+import com.kaoutar.testSpring.dto.MouvementDTO;
 import com.kaoutar.testSpring.dto.ProduitDTO;
+import com.kaoutar.testSpring.enums.StatutMouvement;
 import com.kaoutar.testSpring.mapper.ProduitMapper;
+import com.kaoutar.testSpring.model.Mouvement;
 import com.kaoutar.testSpring.model.Produit;
 import com.kaoutar.testSpring.reposetry.ProduitRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
+@AllArgsConstructor
 @Service
 public class ProduitService {
     private final ProduitRepository repo;
     private  final ProduitMapper mapper;
-    @Autowired
-    public ProduitService(ProduitRepository repository, ProduitMapper mapper) {
-        this.repo = repository;
-        this.mapper = mapper;
-    }
+    private final  MouvementService mouvementService;
+
 
     public ProduitDTO save(ProduitDTO f) {
-
         List<ProduitDTO> produits = getProduitByName(f.getNom());
 
-        Optional<ProduitDTO> existingProduit = produits.stream()
-                .filter(p -> Objects.equals(p.getPrix_unitaire(), f.getPrix_unitaire()))
-                .findFirst();
+        if (produits.stream()
+                .anyMatch(p -> Objects.equals(p.getPrix_unitaire(), f.getPrix_unitaire()))) {
 
-        if (existingProduit.isPresent()) {
-            ProduitDTO produitByName = existingProduit.get();
-            Integer newQnte = produitByName.getQnte_stock() + f.getQnte_stock();
-            produitByName.setQnte_stock(newQnte);
+            ProduitDTO existingProduit = produits.stream()
+                    .filter(p -> Objects.equals(p.getPrix_unitaire(), f.getPrix_unitaire()))
+                    .findFirst()
+                    .get();
 
-            Produit updated = repo.save(mapper.toEntity(produitByName));
-            return mapper.toDto(updated);
+            Integer newQnte = existingProduit.getQnte_stock() + f.getQnte_stock();
+            existingProduit.setQnte_stock(newQnte);
+
+            MouvementDTO mouvementDTO = new MouvementDTO();
+            mouvementDTO.setQuantite(f.getQnte_stock());
+            mouvementDTO.setStatut(StatutMouvement.ENTREE);
+            mouvementDTO.setDateMouvement(new Date());
+
+            Produit produitEntity = repo.save(mapper.toEntity(existingProduit));
+            mouvementDTO.setProduitId(produitEntity.getId());
+            mouvementService.save(mouvementDTO, produitEntity);
+
+            return mapper.toDto(produitEntity);
+        } else {
+
+            Produit savedEntity = repo.save(mapper.toEntity(f));
+
+
+            MouvementDTO mouvementDTO = new MouvementDTO();
+            mouvementDTO.setQuantite(f.getQnte_stock());
+            mouvementDTO.setStatut(StatutMouvement.ENTREE);
+            mouvementDTO.setDateMouvement(new Date());
+            mouvementDTO.setProduitId(savedEntity.getId());
+
+
+            mouvementService.save(mouvementDTO, savedEntity);
+
+            return mapper.toDto(savedEntity);
         }
-        Produit savedEntity = repo.save(mapper.toEntity(f));
-        return mapper.toDto(savedEntity);
     }
 
 

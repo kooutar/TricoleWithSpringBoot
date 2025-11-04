@@ -23,8 +23,7 @@ public interface MouvementMapper {
 
     @Mappings({
             @Mapping(target = "commande", ignore = true),
-            @Mapping(target = "produit", ignore = true),
-            @Mapping(target = "dateMouvement", ignore = true)
+            @Mapping(target = "produit", ignore = true)
     })
     Mouvement toEntity(MouvementDTO dto);
 

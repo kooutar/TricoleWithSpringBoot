@@ -3,6 +3,7 @@ package com.kaoutar.testSpring.service;
 import com.kaoutar.testSpring.dto.CommandeDTO;
 import com.kaoutar.testSpring.dto.MouvementDTO;
 
+import com.kaoutar.testSpring.enums.StatusCommande;
 import com.kaoutar.testSpring.enums.StatutMouvement;
 import com.kaoutar.testSpring.mapper.CommandeMapper;
 import com.kaoutar.testSpring.model.Commande;
@@ -30,22 +31,21 @@ public class CommandeService {
     @Transactional
     public CommandeDTO createCommande(CommandeDTO commandeDTO, Long produitId) {
         try {
-            // 1. Récupérer le produit
+
             Produit produit = produitService.findById(produitId)
                     .orElseThrow(() -> new RuntimeException("Produit non trouvé avec l'ID: " + produitId));
 
-            // 2. Créer et sauvegarder la commande
+
             Commande commande = commandeMapper.toEntity(commandeDTO);
             Commande savedCommande = commandeRepository.save(commande);
 
-            // 3. Créer le mouvement
+
             MouvementDTO mouvementDTO = new MouvementDTO();
             mouvementDTO.setQuantite(commandeDTO.getQuntite());
             mouvementDTO.setStatut(StatutMouvement.AJUSTEMENT);
             mouvementDTO.setDateMouvement(new Date());
             mouvementDTO.setProduitId(produitId);
 
-            // 4. Créer le mouvement avec le produit
             mouvementService.createMouvementForCommande(mouvementDTO, savedCommande, produit);
 
             return commandeMapper.toDto(savedCommande);
@@ -76,17 +76,34 @@ public class CommandeService {
 
     @Transactional
     public CommandeDTO updateCommande(Long id, CommandeDTO commandeDTO) {
-        Commande existingCommande = commandeRepository.findById(id)
+        try {
+            Commande existingCommande = commandeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Commande non trouvée avec l'ID: " + id));
 
-        existingCommande.setQuntite(commandeDTO.getQuntite());
-        existingCommande.setDate_commande(commandeDTO.getDateCommande());
-        if (commandeDTO.getStatut() != null) {
-            existingCommande.setStatut(commandeDTO.getStatut());
-        }
+            // Vérifier si le statut change en SORTIE
+            boolean changementEnSortie = commandeDTO.getStatut() != null &&
+                                       commandeDTO.getStatut().equals(StatusCommande.SORTIE) &&
+                                       !existingCommande.getStatut().equals(StatusCommande.SORTIE);
 
-        Commande updatedCommande = commandeRepository.save(existingCommande);
-        return commandeMapper.toDto(updatedCommande);
+            // Mise à jour des champs de la commande
+            existingCommande.setQuntite(commandeDTO.getQuntite());
+            existingCommande.setDate_commande(commandeDTO.getDateCommande());
+            if (commandeDTO.getStatut() != null) {
+                existingCommande.setStatut(commandeDTO.getStatut());
+            }
+
+            // Sauvegarder la commande
+            Commande updatedCommande = commandeRepository.save(existingCommande);
+
+            // Si le statut change en SORTIE, mettre à jour les mouvements
+            if (changementEnSortie) {
+                mouvementService.updateMouvementsForCommandeSortie(updatedCommande);
+            }
+
+            return commandeMapper.toDto(updatedCommande);
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors de la mise à jour de la commande: " + e.getMessage());
+        }
     }
 
     @Transactional

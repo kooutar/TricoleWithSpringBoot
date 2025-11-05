@@ -2,6 +2,7 @@ package com.kaoutar.testSpring.service;
 
 import com.kaoutar.testSpring.dto.MouvementDTO;
 import com.kaoutar.testSpring.dto.ProduitDTO;
+import com.kaoutar.testSpring.enums.StatutMouvement;
 import com.kaoutar.testSpring.mapper.MouvementMapper;
 import com.kaoutar.testSpring.mapper.ProduitMapper;
 import com.kaoutar.testSpring.model.Commande;
@@ -10,6 +11,8 @@ import com.kaoutar.testSpring.model.Produit;
 import com.kaoutar.testSpring.reposetry.MouvementRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 
 
@@ -38,6 +41,14 @@ public class MouvementService {
 
     public MouvementDTO createMouvementForCommande(MouvementDTO mouvementDTO, Commande commande, Produit produit) {
         return save(mouvementDTO, produit, commande);
+    }
+
+    public void updateMouvementsForCommandeSortie(Commande commande) {
+        List<Mouvement> mouvements = commande.getMouvements();
+        for (Mouvement mouvement : mouvements) {
+            mouvement.setStatut(StatutMouvement.SORTIE);
+            mouvementRepository.save(mouvement);
+        }
     }
 
 }

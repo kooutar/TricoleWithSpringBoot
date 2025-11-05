@@ -51,4 +51,37 @@ public class MouvementService {
         }
     }
 
+    public double calculerCUMP(Long produitId) {
+        List<Mouvement> mouvementsEntree = mouvementRepository.findByProduitIdAndStatut(produitId, StatutMouvement.ENTREE);
+
+        if (mouvementsEntree.isEmpty()) {
+            return 0.0;
+        }
+
+        double totalValeur = 0.0;
+        int totalQuantite = 0;
+
+        for (Mouvement mouvement : mouvementsEntree) {
+            double prixUnitaire = mouvement.getProduit().getPrix_unitaire();
+            int quantite = mouvement.getQuantite();
+
+            totalValeur += prixUnitaire * quantite;
+            totalQuantite += quantite;
+        }
+
+        return totalQuantite > 0 ? totalValeur / totalQuantite : 0.0;
+    }
+
+    public double calculerCoutTotalApprovisionnement(Long produitId) {
+        double cump = calculerCUMP(produitId);
+        List<Mouvement> mouvementsSortie = mouvementRepository.findByProduitIdAndStatut(produitId, StatutMouvement.SORTIE);
+
+        double coutTotal = 0.0;
+        for (Mouvement mouvement : mouvementsSortie) {
+            coutTotal += cump * mouvement.getQuantite();
+        }
+
+        return coutTotal;
+    }
+
 }

@@ -6,6 +6,10 @@ import com.kaoutar.testSpring.model.Fournisseur;
 import com.kaoutar.testSpring.reposetry.FournisseurRepository;
 import org.mapstruct.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,10 +34,16 @@ public class FournisseurService {
      }
 
 
-    public List<FournisseurDTO> getAllFournisseur() {
-         List<Fournisseur> fournisseurs= repo.findAll();
-        return fournisseurs.stream().map(f->mapper.toDto(f) ).collect(Collectors.toList())  ;
-     }
+    public Page<FournisseurDTO> getAllFournisseurs(Pageable pageable) {
+        Page<Fournisseur> fournisseurPage = repo.findAll(pageable);
+        return fournisseurPage.map(mapper::toDto);
+    }
+
+    // Recherche paginée par nom de société
+    public Page<FournisseurDTO> searchFournisseurs(String societe, Pageable pageable) {
+        Page<Fournisseur> fournisseurPage = repo.findBySocieteContainingIgnoreCase(societe, pageable);
+        return fournisseurPage.map(mapper::toDto);
+    }
 
      public  FournisseurDTO updateFournisseur(Long id , FournisseurDTO fournisseurDTO){
          Fournisseur fournisseur = repo.findById(id)

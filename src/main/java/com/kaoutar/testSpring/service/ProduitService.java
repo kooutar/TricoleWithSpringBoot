@@ -8,6 +8,8 @@ import com.kaoutar.testSpring.model.Mouvement;
 import com.kaoutar.testSpring.model.Produit;
 import com.kaoutar.testSpring.reposetry.ProduitRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -68,12 +70,12 @@ public class ProduitService {
     }
 
 
-    public List<ProduitDTO> getAllProduit() {
-        List<Produit> produits = repo.findAll();
-        return produits.stream()
-                .map(mapper::toDto)
-                .collect(Collectors.toList());
+    public Page<ProduitDTO> getAllProduits(Pageable pageable) {
+        Page<Produit> produitPage = repo.findAll(pageable);
+        return produitPage.map(mapper::toDto);
     }
+
+
 
     public  ProduitDTO updateProduit(Long id , ProduitDTO ProduitDTO){
         Optional<Produit> ProduitById= Optional.ofNullable(repo.findById(id).orElseThrow(() -> new RuntimeException("produit non trouvé avec l'ID : " + id)));

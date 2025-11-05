@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Date;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -57,14 +59,9 @@ public class CommandeService {
 
 
 
-    public List<CommandeDTO> getAllCommandes() {
-        List<Commande> commandes = commandeRepository.findAll();
-        return commandes.stream()
-                .map(commande -> {
-                    // On ignore les mouvements pour éviter les problèmes de chargement
-                    return commandeMapper.toDto(commande);
-                })
-                .collect(Collectors.toList());
+    public Page<CommandeDTO> getAllCommandes(Pageable pageable) {
+        Page<Commande> commandePage = commandeRepository.findAll(pageable);
+        return commandePage.map(commandeMapper::toDto);
     }
 
     @Transactional(readOnly = true)

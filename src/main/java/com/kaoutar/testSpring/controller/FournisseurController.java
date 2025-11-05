@@ -5,6 +5,10 @@ import com.kaoutar.testSpring.service.FournisseurService;
 import  com.kaoutar.testSpring.model.Fournisseur;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,10 +28,25 @@ public class FournisseurController {
         return ResponseEntity.ok(saved);
     }
 
-    // ✅ Récupérer tous les fournisseurs
+    // ✅ Récupérer tous les fournisseurs (paginé)
     @GetMapping
-    public List<FournisseurDTO> getAllFournisseurs() {
-        return fournisseurService.getAllFournisseur();
+    public ResponseEntity<Page<FournisseurDTO>> getAllFournisseurs(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sort) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
+        return ResponseEntity.ok(fournisseurService.getAllFournisseurs(pageable));
+    }
+
+    // ✅ Rechercher des fournisseurs par société
+    @GetMapping("/search")
+    public ResponseEntity<Page<FournisseurDTO>> searchFournisseurs(
+            @RequestParam String societe,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "societe") String sort) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
+        return ResponseEntity.ok(fournisseurService.searchFournisseurs(societe, pageable));
     }
 
     // ✅ Récupérer un fournisseur par ID

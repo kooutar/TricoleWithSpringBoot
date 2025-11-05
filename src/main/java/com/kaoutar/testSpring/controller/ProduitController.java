@@ -4,6 +4,10 @@ import com.kaoutar.testSpring.dto.ProduitDTO;
 import com.kaoutar.testSpring.service.ProduitService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,8 +26,12 @@ public class ProduitController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ProduitDTO>> getAllProduits() {
-        return ResponseEntity.ok(produitService.getAllProduit());
+    public ResponseEntity<Page<ProduitDTO>> getAllProduits(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sort) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
+        return ResponseEntity.ok(produitService.getAllProduits(pageable));
     }
 
     @GetMapping("/{id}")

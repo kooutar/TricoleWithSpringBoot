@@ -17,8 +17,10 @@ public class CommandeController {
     private final CommandeService commandeService;
 
     @PostMapping
-    public ResponseEntity<CommandeDTO> createCommande(@Valid @RequestBody CommandeDTO commandeDTO) {
-        return new ResponseEntity<>(commandeService.createCommande(commandeDTO), HttpStatus.CREATED);
+    public ResponseEntity<CommandeDTO> createCommande(
+            @Valid @RequestBody CommandeDTO commandeDTO,
+            @RequestParam Long produitId) {
+        return new ResponseEntity<>(commandeService.createCommande(commandeDTO, produitId), HttpStatus.CREATED);
     }
 
     @GetMapping

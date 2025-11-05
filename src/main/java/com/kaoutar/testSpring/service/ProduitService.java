@@ -37,14 +37,16 @@ public class ProduitService {
             Integer newQnte = existingProduit.getQnte_stock() + f.getQnte_stock();
             existingProduit.setQnte_stock(newQnte);
 
+            // Sauvegarder le produit d'abord
+            Produit produitEntity = repo.save(mapper.toEntity(existingProduit));
+
+            // Créer et sauvegarder le mouvement
             MouvementDTO mouvementDTO = new MouvementDTO();
             mouvementDTO.setQuantite(f.getQnte_stock());
             mouvementDTO.setStatut(StatutMouvement.ENTREE);
             mouvementDTO.setDateMouvement(new Date());
 
-            Produit produitEntity = repo.save(mapper.toEntity(existingProduit));
-            mouvementDTO.setProduitId(produitEntity.getId());
-            mouvementService.save(mouvementDTO, produitEntity);
+            mouvementService.createMouvementForProduit(mouvementDTO, produitEntity);
 
             return mapper.toDto(produitEntity);
         } else {
@@ -59,7 +61,7 @@ public class ProduitService {
             mouvementDTO.setProduitId(savedEntity.getId());
 
 
-            mouvementService.save(mouvementDTO, savedEntity);
+            mouvementService.save(mouvementDTO, savedEntity, null);
 
             return mapper.toDto(savedEntity);
         }
@@ -102,5 +104,7 @@ public class ProduitService {
                 .stream().collect(Collectors.toList());
     }
 
-
+    public Optional<Produit> findById(Long id) {
+        return repo.findById(id);
+    }
 }

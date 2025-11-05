@@ -1,14 +1,20 @@
 package com.kaoutar.testSpring.service;
 
 import com.kaoutar.testSpring.dto.CommandeDTO;
+import com.kaoutar.testSpring.dto.MouvementDTO;
+
+import com.kaoutar.testSpring.enums.StatutMouvement;
 import com.kaoutar.testSpring.mapper.CommandeMapper;
 import com.kaoutar.testSpring.model.Commande;
+
+import com.kaoutar.testSpring.model.Produit;
 import com.kaoutar.testSpring.reposetry.CommandeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,12 +23,31 @@ import java.util.stream.Collectors;
 public class CommandeService {
     private final CommandeRepository commandeRepository;
     private final CommandeMapper commandeMapper;
+    private  final  MouvementService mouvementService;
+
+    private final ProduitService produitService;
 
     @Transactional
-    public CommandeDTO createCommande(CommandeDTO commandeDTO) {
+    public CommandeDTO createCommande(CommandeDTO commandeDTO, Long produitId) {
         try {
+            // 1. Récupérer le produit
+            Produit produit = produitService.findById(produitId)
+                    .orElseThrow(() -> new RuntimeException("Produit non trouvé avec l'ID: " + produitId));
+
+            // 2. Créer et sauvegarder la commande
             Commande commande = commandeMapper.toEntity(commandeDTO);
             Commande savedCommande = commandeRepository.save(commande);
+
+            // 3. Créer le mouvement
+            MouvementDTO mouvementDTO = new MouvementDTO();
+            mouvementDTO.setQuantite(commandeDTO.getQuntite());
+            mouvementDTO.setStatut(StatutMouvement.AJUSTEMENT);
+            mouvementDTO.setDateMouvement(new Date());
+            mouvementDTO.setProduitId(produitId);
+
+            // 4. Créer le mouvement avec le produit
+            mouvementService.createMouvementForCommande(mouvementDTO, savedCommande, produit);
+
             return commandeMapper.toDto(savedCommande);
         } catch (Exception e) {
             throw new RuntimeException("Erreur lors de la création de la commande: " + e.getMessage());
@@ -54,7 +79,6 @@ public class CommandeService {
         Commande existingCommande = commandeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Commande non trouvée avec l'ID: " + id));
 
-        // Mise à jour des champs
         existingCommande.setQuntite(commandeDTO.getQuntite());
         existingCommande.setDate_commande(commandeDTO.getDateCommande());
         if (commandeDTO.getStatut() != null) {
@@ -72,4 +96,6 @@ public class CommandeService {
         }
         commandeRepository.deleteById(id);
     }
+
+
 }

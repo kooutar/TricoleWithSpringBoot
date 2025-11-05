@@ -1,7 +1,9 @@
 package com.kaoutar.testSpring.service;
 
 import com.kaoutar.testSpring.dto.MouvementDTO;
+import com.kaoutar.testSpring.dto.ProduitDTO;
 import com.kaoutar.testSpring.mapper.MouvementMapper;
+import com.kaoutar.testSpring.mapper.ProduitMapper;
 import com.kaoutar.testSpring.model.Commande;
 import com.kaoutar.testSpring.model.Mouvement;
 import com.kaoutar.testSpring.model.Produit;
@@ -11,29 +13,31 @@ import org.springframework.stereotype.Service;
 
 
 
-@AllArgsConstructor
 @Service
+@AllArgsConstructor
 public class MouvementService {
 
-    public  final MouvementRepository mouvementRepository;
-    public  final MouvementMapper mouvementMapper;
+    private final MouvementRepository mouvementRepository;
+    private final MouvementMapper mouvementMapper;
 
-    public MouvementDTO save(MouvementDTO mouvementDTO, Object source) {
-        if (source instanceof Produit) {
-            Produit produit = (Produit) source;
-            Mouvement mouvement = mouvementMapper.toEntity(mouvementDTO);
-            mouvement.setProduit(produit);  // Set the product before saving
-            Mouvement savedMouvement = mouvementRepository.save(mouvement);
-            return mouvementMapper.toDto(savedMouvement);
+    public MouvementDTO save(MouvementDTO mouvementDTO, Produit produit, Commande commande) {
+        Mouvement mouvement = mouvementMapper.toEntity(mouvementDTO);
+        if (produit != null) {
+            mouvement.setProduit(produit);
         }
-        if (source instanceof Commande) {
-            Commande commande = (Commande) source;
-            Mouvement mouvement = mouvementMapper.toEntity(mouvementDTO);
-            mouvement.setCommande(commande);  // Set the commande before saving
-            Mouvement savedMouvement = mouvementRepository.save(mouvement);
-            return mouvementMapper.toDto(savedMouvement);
+        if (commande != null) {
+            mouvement.setCommande(commande);
         }
-        return null;
+        Mouvement savedMouvement = mouvementRepository.save(mouvement);
+        return mouvementMapper.toDto(savedMouvement);
+    }
+
+    public MouvementDTO createMouvementForProduit(MouvementDTO mouvementDTO, Produit produit) {
+        return save(mouvementDTO, produit, null);
+    }
+
+    public MouvementDTO createMouvementForCommande(MouvementDTO mouvementDTO, Commande commande, Produit produit) {
+        return save(mouvementDTO, produit, commande);
     }
 
 }

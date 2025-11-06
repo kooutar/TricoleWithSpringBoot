@@ -109,4 +109,7 @@ public class ProduitService {
     public Optional<Produit> findById(Long id) {
         return repo.findById(id);
     }
-}
+
+    public Produit saveProduit(Produit produit) {
+        return repo.save(produit);
+}}

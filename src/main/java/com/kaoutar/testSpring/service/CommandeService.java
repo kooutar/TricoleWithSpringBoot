@@ -30,25 +30,45 @@ public class CommandeService {
 
     private final ProduitService produitService;
 
+    private void updateProduitStock(Produit produit, int quantite, boolean isEntree) {
+        int currentStock = produit.getQnte_stock() != null ? produit.getQnte_stock() : 0;
+        int newStock = isEntree ? currentStock + quantite : currentStock - quantite;
+
+        if (newStock < 0) {
+            throw new RuntimeException("Stock insuffisant pour le produit: " + produit.getNom());
+        }
+
+        produit.setQnte_stock(newStock);
+        produitService.saveProduit(produit);
+    }
+
     @Transactional
     public CommandeDTO createCommande(CommandeDTO commandeDTO, Long produitId) {
         try {
-
             Produit produit = produitService.findById(produitId)
                     .orElseThrow(() -> new RuntimeException("Produit non trouvé avec l'ID: " + produitId));
 
+            // Vérifier le stock avant de créer la commande
+            if (produit.getQnte_stock() < commandeDTO.getQuntite()) {
+                throw new RuntimeException("Stock insuffisant pour le produit: " + produit.getNom());
+            }
 
+            // Créer et sauvegarder la commande
             Commande commande = commandeMapper.toEntity(commandeDTO);
             Commande savedCommande = commandeRepository.save(commande);
 
-
+            // Créer le mouvement
             MouvementDTO mouvementDTO = new MouvementDTO();
             mouvementDTO.setQuantite(commandeDTO.getQuntite());
             mouvementDTO.setStatut(StatutMouvement.AJUSTEMENT);
             mouvementDTO.setDateMouvement(new Date());
             mouvementDTO.setProduitId(produitId);
 
+            // Sauvegarder le mouvement
             mouvementService.createMouvementForCommande(mouvementDTO, savedCommande, produit);
+
+            // Mettre à jour le stock
+            updateProduitStock(produit, commandeDTO.getQuntite(), false);
 
             return commandeMapper.toDto(savedCommande);
         } catch (Exception e) {
@@ -81,6 +101,13 @@ public class CommandeService {
             boolean changementEnSortie = commandeDTO.getStatut() != null &&
                                        commandeDTO.getStatut().equals(StatusCommande.SORTIE) &&
                                        !existingCommande.getStatut().equals(StatusCommande.SORTIE);
+
+            // Si la quantité change, mettre à jour le stock
+            if (existingCommande.getQuntite() != commandeDTO.getQuntite()) {
+                Produit produit = existingCommande.getMouvements().get(0).getProduit();
+                int difference = commandeDTO.getQuntite() - existingCommande.getQuntite();
+                updateProduitStock(produit, Math.abs(difference), difference < 0);
+            }
 
             // Mise à jour des champs de la commande
             existingCommande.setQuntite(commandeDTO.getQuntite());

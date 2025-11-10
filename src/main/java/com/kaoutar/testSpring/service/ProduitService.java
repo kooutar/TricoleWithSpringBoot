@@ -7,6 +7,7 @@ import com.kaoutar.testSpring.mapper.ProduitMapper;
 import com.kaoutar.testSpring.model.Mouvement;
 import com.kaoutar.testSpring.model.Produit;
 import com.kaoutar.testSpring.reposetry.ProduitRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -78,7 +79,7 @@ public class ProduitService {
 
 
     public  ProduitDTO updateProduit(Long id , ProduitDTO ProduitDTO){
-        Optional<Produit> ProduitById= Optional.ofNullable(repo.findById(id).orElseThrow(() -> new RuntimeException("produit non trouvé avec l'ID : " + id)));
+        Optional<Produit> ProduitById= Optional.ofNullable(repo.findById(id).orElseThrow(() -> new EntityNotFoundException("produit non trouvé avec l'ID : " + id)));
 
         mapper.UpdateProduitFromDTO(ProduitDTO, ProduitById.get());
 
@@ -96,7 +97,7 @@ public class ProduitService {
     }
 
     public ProduitDTO getProduitById(Long id) {
-        Optional<Produit> produitById = repo.findById(id);
+        Optional<Produit> produitById =Optional.ofNullable(repo.findById(id).orElseThrow(() -> new EntityNotFoundException("Produit non trouvé avec l'ID : " + id)));
         return produitById.map(mapper::toDto).orElse(null);
     }
 
@@ -107,7 +108,7 @@ public class ProduitService {
     }
 
     public Optional<Produit> findById(Long id) {
-        return repo.findById(id);
+        return Optional.ofNullable(repo.findById(id).orElseThrow(() -> new EntityNotFoundException("Produit non trouvé avec l'ID : " + id)));
     }
 
     public Produit saveProduit(Produit produit) {

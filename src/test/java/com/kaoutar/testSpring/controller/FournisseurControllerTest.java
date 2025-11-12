@@ -1,4 +1,4 @@
 package com.kaoutar.testSpring.controller;
 
-public class FournisseurControllertEST {
+public class FournisseurControllerTest {
 }

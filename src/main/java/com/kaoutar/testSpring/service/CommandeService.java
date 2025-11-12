@@ -48,26 +48,25 @@ public class CommandeService {
             Produit produit = produitService.findById(produitId)
                     .orElseThrow(() -> new RuntimeException("Produit non trouvé avec l'ID: " + produitId));
 
-            // Vérifier le stock avant de créer la commande
+
             if (produit.getQnte_stock() < commandeDTO.getQuntite()) {
                 throw new RuntimeException("Stock insuffisant pour le produit: " + produit.getNom());
             }
 
-            // Créer et sauvegarder la commande
             Commande commande = commandeMapper.toEntity(commandeDTO);
             Commande savedCommande = commandeRepository.save(commande);
 
-            // Créer le mouvement
+
             MouvementDTO mouvementDTO = new MouvementDTO();
             mouvementDTO.setQuantite(commandeDTO.getQuntite());
             mouvementDTO.setStatut(StatutMouvement.AJUSTEMENT);
             mouvementDTO.setDateMouvement(new Date());
             mouvementDTO.setProduitId(produitId);
 
-            // Sauvegarder le mouvement
+
             mouvementService.createMouvementForCommande(mouvementDTO, savedCommande, produit);
 
-            // Mettre à jour le stock
+
             updateProduitStock(produit, commandeDTO.getQuntite(), false);
 
             return commandeMapper.toDto(savedCommande);
@@ -82,6 +81,11 @@ public class CommandeService {
     public Page<CommandeDTO> getAllCommandes(Pageable pageable) {
         Page<Commande> commandePage = commandeRepository.findAll(pageable);
         return commandePage.map(commandeMapper::toDto);
+    }
+
+    public List<Commande> getAllCommandes() {
+        return commandeRepository.findAll();
+
     }
 
     @Transactional(readOnly = true)
@@ -137,6 +141,9 @@ public class CommandeService {
         }
         commandeRepository.deleteById(id);
     }
+
+
+
 
 
 }

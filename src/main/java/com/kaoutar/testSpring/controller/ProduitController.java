@@ -11,7 +11,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,7 +31,8 @@ public class ProduitController {
     public ResponseEntity<Page<ProduitDTO>> getAllProduits(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sort) {
+            @RequestParam(defaultValue = "id") String sort)
+    {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
         return ResponseEntity.ok(produitService.getAllProduits(pageable));
     }

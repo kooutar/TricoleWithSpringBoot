@@ -30,7 +30,7 @@ public class CommandeService {
 
     private final ProduitService produitService;
 
-    private void updateProduitStock(Produit produit, int quantite, boolean isEntree) {
+    void updateProduitStock(Produit produit, int quantite, boolean isEntree) {
         int currentStock = produit.getQnte_stock() != null ? produit.getQnte_stock() : 0;
         int newStock = isEntree ? currentStock + quantite : currentStock - quantite;
 

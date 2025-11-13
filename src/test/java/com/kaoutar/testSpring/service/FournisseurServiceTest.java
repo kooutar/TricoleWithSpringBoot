@@ -88,26 +88,49 @@ class FournisseurServiceTest {
   }
   @Test
     void testUpdateFournisseur(){
-        FournisseurDTO dto = new FournisseurDTO();
-          dto.setSociete("Société Modifiée");
-          dto.setAdresse("Nouvelle Adresse");
-          dto.setContact("Nouveau Contact");
-          dto.setEmail("modifie@email.com");
-          dto.setTelephone("0123456789");
-          dto.setVille("Rabat");
-          dto.setIce("1234567890");
-         Fournisseur existingEntity = new Fournisseur();
-         existingEntity.setId(1L);
-         existingEntity.setSociete("Auncienne societe ");
-         when(mapper.toEntity(dto)).thenReturn(existingEntity);
-         when(mapper.toDto(existingEntity)).thenReturn(dto);
-         when(repo.findById(1L)).thenReturn(Optional.of(existingEntity));
+      FournisseurDTO dto = new FournisseurDTO();
+      dto.setSociete("Société Modifiée");
+      dto.setAdresse("Nouvelle Adresse");
+      dto.setContact("Nouveau Contact");
+      dto.setEmail("modifie@email.com");
+      dto.setTelephone("0123456789");
+      dto.setVille("Rabat");
+      dto.setIce("1234567890");
 
-        FournisseurDTO updeted= fournisseurService.updateFournisseur(1L,dto);
-        assertNotNull(updeted);
-        assertEquals(dto.getSociete(),updeted.getSociete());
+      // Entité existante en base
+      Fournisseur existingEntity = new Fournisseur();
+      existingEntity.setId(1L);
+      existingEntity.setSociete("Ancienne société");
 
+      // Entité après mise à jour
+      Fournisseur updatedEntity = new Fournisseur();
+      updatedEntity.setId(1L);
+      updatedEntity.setSociete("Société Modifiée");
+      updatedEntity.setAdresse("Nouvelle Adresse");
+      updatedEntity.setContact("Nouveau Contact");
+      updatedEntity.setEmail("modifie@email.com");
+      updatedEntity.setTelephone("0123456789");
+      updatedEntity.setVille("Rabat");
+      updatedEntity.setIce("1234567890");
 
+      // Configuration des mocks
+      when(repo.findById(1L)).thenReturn(Optional.of(existingEntity));
+      when(repo.save(any(Fournisseur.class))).thenReturn(updatedEntity);
+      when(mapper.toDto(updatedEntity)).thenReturn(dto);
+
+      // Act
+      FournisseurDTO result = fournisseurService.updateFournisseur(1L, dto);
+
+      // Assert
+      assertNotNull(result);
+      assertEquals("Société Modifiée", result.getSociete());
+      assertEquals("Nouvelle Adresse", result.getAdresse());
+      assertEquals("modifie@email.com", result.getEmail());
+
+      // Vérifications
+      verify(repo, times(1)).findById(1L);
+      verify(repo, times(1)).save(any(Fournisseur.class));
+      verify(mapper, times(1)).toDto(any(Fournisseur.class));
 
 
   }

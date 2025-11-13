@@ -389,6 +389,113 @@ class ProduitServiceTest {
         verify(repo, times(1)).findById(id);
         verify(mapper, never()).toDto(any());
     }
+    // 🧪 Cas 1 : le produit existe et est bien mis à jour
+    @Test
+    void testUpdateProduit_Success() {
+        // --- 1. Données simulées ---
+        Long id = 1L;
+
+        Produit ancienProduit = new Produit();
+        ancienProduit.setId(id);
+        ancienProduit.setNom("Ancien Nom");
+
+        ProduitDTO produitDTO = new ProduitDTO();
+        produitDTO.setNom("Nouveau Nom");
+
+        Produit produitMisAJour = new Produit();
+        produitMisAJour.setId(id);
+        produitMisAJour.setNom("Nouveau Nom");
+
+        ProduitDTO produitDTOResult = new ProduitDTO();
+        produitDTOResult.setId(id);
+        produitDTOResult.setNom("Nouveau Nom");
+
+        // --- 2. Comportement des mocks ---
+        when(repo.findById(id)).thenReturn(Optional.of(ancienProduit)); // simulate findById
+        doNothing().when(mapper).UpdateProduitFromDTO(produitDTO, ancienProduit); // simulate update (void)
+        when(repo.save(ancienProduit)).thenReturn(produitMisAJour); // simulate save
+        when(mapper.toDto(produitMisAJour)).thenReturn(produitDTOResult); // simulate mapping to DTO
+
+        // --- 3. Appel de la méthode testée ---
+        ProduitDTO result = produitService.updateProduit(id, produitDTO);
+
+        // --- 4. Vérifications ---
+        assertNotNull(result);
+        assertEquals("Nouveau Nom", result.getNom());
+        assertEquals(id, result.getId());
+
+        verify(repo, times(1)).findById(id);
+        verify(mapper, times(1)).UpdateProduitFromDTO(produitDTO, ancienProduit);
+        verify(repo, times(1)).save(ancienProduit);
+        verify(mapper, times(1)).toDto(produitMisAJour);
+    }
+
+    // 🧪 Cas 2 : le produit n’existe pas → exception levée
+    @Test
+    void testUpdateProduit_NotFound() {
+        Long id = 99L;
+        ProduitDTO produitDTO = new ProduitDTO();
+
+        when(repo.findById(id)).thenReturn(Optional.empty()); // produit introuvable
+
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+                () -> produitService.updateProduit(id, produitDTO));
+
+        assertEquals("produit non trouvé avec l'ID : " + id, exception.getMessage());
+
+        verify(repo, times(1)).findById(id);
+        verify(mapper, never()).UpdateProduitFromDTO(any(), any());
+        verify(repo, never()).save(any());
+    }
+
+    // 🧪 Cas 1 : Produit trouvé
+    @Test
+    void testGetProduitByName_Found() {
+        // --- 1. Données simulées ---
+        String nom = "Ordinateur";
+        Produit produit = new Produit();
+        produit.setId(1L);
+        produit.setNom(nom);
+
+        ProduitDTO dto = new ProduitDTO();
+        dto.setId(1L);
+        dto.setNom(nom);
+
+        // --- 2. Mock des comportements ---
+        when(repo.findByNom(nom)).thenReturn(Optional.of(produit));
+        when(mapper.toDto(produit)).thenReturn(dto);
+
+        // --- 3. Appel de la méthode ---
+        List<ProduitDTO> result = produitService.getProduitByName(nom);
+
+        // --- 4. Vérifications ---
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("Ordinateur", result.get(0).getNom());
+
+        verify(repo, times(1)).findByNom(nom);
+        verify(mapper, times(1)).toDto(produit);
+    }
+
+    // 🧪 Cas 2 : Produit non trouvé
+    @Test
+    void testGetProduitByName_NotFound() {
+        String nom = "Inexistant";
+
+        // --- 1. Mock du repo pour retourner vide ---
+        when(repo.findByNom(nom)).thenReturn(Optional.empty());
+
+        // --- 2. Appel de la méthode ---
+        List<ProduitDTO> result = produitService.getProduitByName(nom);
+
+        // --- 3. Vérifications ---
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        verify(repo, times(1)).findByNom(nom);
+        verify(mapper, never()).toDto(any());
+    }
+
 
 }
 

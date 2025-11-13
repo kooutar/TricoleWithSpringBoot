@@ -11,6 +11,7 @@ import com.kaoutar.testSpring.mapper.ProduitMapper;
 
 
 import com.kaoutar.testSpring.reposetry.ProduitRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -310,5 +311,84 @@ class ProduitServiceTest {
         // Vérifier que repo.findAll a été appelé une seule fois
         verify(repo, times(1)).findAll(pageable);
     }
+    @Test
+    void testDeleteProduit_Exists() {
+        Long id = 1L;
+        Produit produitExistant = new Produit();
+        produitExistant.setId(id);
+
+        // Mock repo.findById pour renvoyer le produit
+        when(repo.findById(id)).thenReturn(Optional.of(produitExistant));
+
+        // Appeler la méthode
+        String result = produitService.deleteProduit(id);
+
+        // Vérifications
+        assertEquals("delete with succes", result);
+        verify(repo, times(1)).findById(id);
+        verify(repo, times(1)).delete(produitExistant);
+    }
+
+    @Test
+    void testDeleteProduit_NotExists() {
+        Long id = 1L;
+
+        // Mock repo.findById pour renvoyer vide
+        when(repo.findById(id)).thenReturn(Optional.empty());
+
+        // Appeler la méthode
+        String result = produitService.deleteProduit(id);
+
+        // Vérifications
+        assertEquals("product don't exist", result);
+        verify(repo, times(1)).findById(id);
+        verify(repo, never()).delete(any());
+    }
+
+    @Test
+    void testGetProduitById_Exists() {
+        Long id = 1L;
+        Produit produit = new Produit();
+        produit.setId(id);
+        produit.setNom("Produit1");
+
+        ProduitDTO produitDTO = new ProduitDTO();
+        produitDTO.setId(id);
+        produitDTO.setNom("Produit1");
+
+        // Mock repo.findById
+        when(repo.findById(id)).thenReturn(Optional.of(produit));
+
+        // Mock mapper
+        when(mapper.toDto(produit)).thenReturn(produitDTO);
+
+        // Appeler la méthode
+        ProduitDTO result = produitService.getProduitById(id);
+
+        // Vérifications
+        assertNotNull(result);
+        assertEquals(id, result.getId());
+        assertEquals("Produit1", result.getNom());
+
+        verify(repo, times(1)).findById(id);
+        verify(mapper, times(1)).toDto(produit);
+    }
+
+    @Test
+    void testGetProduitById_NotExists() {
+        Long id = 1L;
+
+        // Mock repo.findById pour retourner vide
+        when(repo.findById(id)).thenReturn(Optional.empty());
+
+        // Vérifier que l'exception est bien levée
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+                () -> produitService.getProduitById(id));
+
+        assertEquals("Produit non trouvé avec l'ID : " + id, exception.getMessage());
+        verify(repo, times(1)).findById(id);
+        verify(mapper, never()).toDto(any());
+    }
+
 }
 

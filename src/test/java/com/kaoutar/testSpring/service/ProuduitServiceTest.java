@@ -19,6 +19,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.*;
 
@@ -263,6 +267,48 @@ class ProduitServiceTest {
                 eq(newEntity),
                 isNull()
         );
+    }
+
+    @Test
+    void testGetAllProduits() {
+        // 1. Préparer les données
+        Produit produit1 = new Produit();
+        produit1.setId(1L);
+        produit1.setNom("Produit1");
+
+        Produit produit2 = new Produit();
+        produit2.setId(2L);
+        produit2.setNom("Produit2");
+
+        List<Produit> produits = List.of(produit1, produit2);
+        Page<Produit> pageProduits = new PageImpl<>(produits);
+
+        // 2. Mock le repo pour renvoyer la page
+        Pageable pageable = PageRequest.of(0, 10);
+        when(repo.findAll(pageable)).thenReturn(pageProduits);
+
+        // 3. Mock le mapper pour transformer les entités en DTO
+        ProduitDTO dto1 = new ProduitDTO();
+        dto1.setId(1L);
+        dto1.setNom("Produit1");
+
+        ProduitDTO dto2 = new ProduitDTO();
+        dto2.setId(2L);
+        dto2.setNom("Produit2");
+
+        when(mapper.toDto(produit1)).thenReturn(dto1);
+        when(mapper.toDto(produit2)).thenReturn(dto2);
+
+        // 4. Appeler la méthode
+        Page<ProduitDTO> result = produitService.getAllProduits(pageable);
+
+        // 5. Vérifier les résultats
+        assertEquals(2, result.getContent().size());
+        assertEquals("Produit1", result.getContent().get(0).getNom());
+        assertEquals("Produit2", result.getContent().get(1).getNom());
+
+        // Vérifier que repo.findAll a été appelé une seule fois
+        verify(repo, times(1)).findAll(pageable);
     }
 }
 

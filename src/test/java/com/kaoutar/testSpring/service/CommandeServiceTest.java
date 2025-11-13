@@ -359,4 +359,23 @@ public class CommandeServiceTest {
         verify(commandeRepository, times(1)).findAll();
     }
 
+    @Test
+    void testGetCommandeById_CommandeNonTrouvee() {
+        Long id = 1L;
+
+        // 🔹 Simuler le repository qui ne trouve pas la commande
+        when(commandeRepository.findById(id)).thenReturn(Optional.empty());
+
+        // 🔹 Vérifier que la méthode lève bien l'exception
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            commandeService.getCommandeById(id);
+        });
+
+        // 🔹 Vérifier le message de l'exception
+        assertTrue(exception.getMessage().contains("Commande non trouvée avec l'ID: " + id));
+
+        // 🔹 Vérifier que mapper n'a jamais été appelé
+        verify(commandeMapper, never()).toDto(any());
+    }
+
 }

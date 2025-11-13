@@ -257,4 +257,18 @@ public class CommandeServiceTest {
         verify(commandeService, times(1)).updateProduitStock(produit, 3, false);
         verify(commandeRepository, times(1)).save(existing);
     }
+
+    // 🧪 Cas 1 : Stock existant, entrée (ajout)
+    @Test
+    void testUpdateProduitStock_Entree_AvecStock() {
+        Produit produit = new Produit();
+        produit.setNom("PC");
+        produit.setQnte_stock(10);
+
+        commandeService.updateProduitStock(produit, 5, true);
+
+        assertEquals(15, produit.getQnte_stock());
+        verify(produitService, times(1)).saveProduit(produit);
+    }
+
 }

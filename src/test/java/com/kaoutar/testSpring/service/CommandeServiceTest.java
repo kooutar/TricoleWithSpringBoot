@@ -310,4 +310,27 @@ public class CommandeServiceTest {
         verify(produitService, never()).saveProduit(any());
     }
 
+    // 🧪 Cas : Produit introuvable
+    @Test
+    void testCreateCommande_ProduitNonTrouve() {
+        // 🔹 Données simulées
+        Long produitId = 1L;
+        CommandeDTO commandeDTO = new CommandeDTO();
+
+        // 🔹 Simuler produitService.findById() retournant un Optional vide
+        when(produitService.findById(produitId)).thenReturn(Optional.empty());
+
+        // 🔹 Vérifier qu'une exception est levée
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            commandeService.createCommande(commandeDTO, produitId);
+        });
+
+        // 🔹 Vérifier le message exact
+        assertTrue(exception.getMessage().contains("Produit non trouvé avec l'ID: " + produitId));
+
+        // 🔹 Vérifier qu’aucune sauvegarde n’a été faite
+        verify(commandeRepository, never()).save(any());
+        verify(mouvementService, never()).createMouvementForCommande(any(), any(), any());
+    }
+
 }

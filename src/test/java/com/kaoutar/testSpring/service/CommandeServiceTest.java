@@ -333,4 +333,30 @@ public class CommandeServiceTest {
         verify(mouvementService, never()).createMouvementForCommande(any(), any(), any());
     }
 
+    @Test
+    void testGetAllCommandes_ReturnsListOfCommandes() {
+        // 🔹 Préparation des données simulées
+        Commande c1 = new Commande();
+        c1.setId(1L);
+        Commande c2 = new Commande();
+        c2.setId(2L);
+
+        List<Commande> commandesSimulees = List.of(c1, c2);
+
+        // 🔹 Simuler le comportement du repository
+        when(commandeRepository.findAll()).thenReturn(commandesSimulees);
+
+        // 🔹 Exécuter la méthode à tester
+        List<Commande> result = commandeService.getAllCommandes();
+
+        // 🔹 Vérifications
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals(1L, result.get(0).getId());
+        assertEquals(2L, result.get(1).getId());
+
+        // 🔹 Vérifier que le repository a bien été appelé une seule fois
+        verify(commandeRepository, times(1)).findAll();
+    }
+
 }

@@ -283,4 +283,31 @@ public class CommandeServiceTest {
         verify(produitService, times(1)).saveProduit(produit);
     }
 
+    // 🧪 Cas 3 : Stock null, entrée
+    @Test
+    void testUpdateProduitStock_Entree_StockNull() {
+        Produit produit = new Produit();
+        produit.setNom("Clavier");
+        produit.setQnte_stock(null); // stock null
+
+        commandeService.updateProduitStock(produit, 8, true);
+
+        assertEquals(8, produit.getQnte_stock());
+        verify(produitService, times(1)).saveProduit(produit);
+    }
+
+    // 🧪 Cas 4 : Stock insuffisant (sortie trop grande)
+    @Test
+    void testUpdateProduitStock_StockInsuffisant() {
+        Produit produit = new Produit();
+        produit.setNom("Souris");
+        produit.setQnte_stock(3);
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                commandeService.updateProduitStock(produit, 5, false));
+
+        assertTrue(ex.getMessage().contains("Stock insuffisant"));
+        verify(produitService, never()).saveProduit(any());
+    }
+
 }

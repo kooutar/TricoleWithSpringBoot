@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
@@ -166,6 +167,54 @@ public class MouvementServiceTest {
         double result = mouvementService.calculerCUMP(1L);
 
         assertEquals(0.0, result);
+    }
+
+    // 🧪 Cas 1 : Calcul normal du coût total
+    @Test
+    void testCalculerCoutTotalApprovisionnement_Success() {
+        Long produitId = 1L;
+
+        // Mouvements de sortie (2 mouvements)
+        Mouvement mvt1 = new Mouvement();
+        mvt1.setQuantite(5);
+        Mouvement mvt2 = new Mouvement();
+        mvt2.setQuantite(10);
+
+        // Simuler que le CUMP (coût moyen pondéré) est 20.0
+        MouvementService spyService = Mockito.spy(mouvementService);
+        doReturn(20.0).when(spyService).calculerCUMP(produitId);
+
+        // Mock du repository : mouvements SORTIE
+        when(mouvementRepository.findByProduitIdAndStatut(produitId, StatutMouvement.SORTIE))
+                .thenReturn(List.of(mvt1, mvt2));
+
+        // Appel de la méthode
+        double result = spyService.calculerCoutTotalApprovisionnement(produitId);
+
+        // Vérification du calcul : (5 + 10) * 20 = 300
+        assertEquals(300.0, result);
+
+        verify(mouvementRepository, times(1))
+                .findByProduitIdAndStatut(produitId, StatutMouvement.SORTIE);
+    }
+
+    // 🧪 Cas 2 : Aucun mouvement SORTIE
+    @Test
+    void testCalculerCoutTotalApprovisionnement_AucunMouvement() {
+        Long produitId = 1L;
+
+        MouvementService spyService = Mockito.spy(mouvementService);
+        doReturn(15.0).when(spyService).calculerCUMP(produitId);
+
+        // Aucun mouvement dans le repository
+        when(mouvementRepository.findByProduitIdAndStatut(produitId, StatutMouvement.SORTIE))
+                .thenReturn(List.of());
+
+        double result = spyService.calculerCoutTotalApprovisionnement(produitId);
+
+        assertEquals(0.0, result);
+        verify(mouvementRepository, times(1))
+                .findByProduitIdAndStatut(produitId, StatutMouvement.SORTIE);
     }
 
 }

@@ -32,4 +32,14 @@ databaseChangeLog:
                   type: VARCHAR(100)
                   constraints:
                     nullable: true
+              - column:
+                  name: prix_construction
+                  type: DECIMAL(10,2)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: qnte_stock
+                  type: INT
+                  constraints:
+                    nullable: true
 

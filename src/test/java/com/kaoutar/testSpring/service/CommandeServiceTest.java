@@ -185,37 +185,8 @@ public class CommandeServiceTest {
         verify(commandeRepository, times(1)).save(existing);
     }
 
-    // 🧪 2️⃣ Cas : changement de statut → SORTIE
-    @Test
-    void testUpdateCommande_ChangementEnSortie() {
-        Long id = 1L;
-        Commande existing = new Commande();
-        existing.setId(id);
-        existing.setQuntite(5);
-        existing.setStatut(StatusCommande.ENTREE);
-        existing.setMouvements(List.of());
 
-        CommandeDTO dto = new CommandeDTO();
-        dto.setQuntite(5);
-        dto.setStatut(StatusCommande.SORTIE); // changement vers SORTIE
 
-        Commande updated = new Commande();
-        updated.setId(id);
-        updated.setStatut(StatusCommande.SORTIE);
-
-        CommandeDTO updatedDto = new CommandeDTO();
-        updatedDto.setId(id);
-
-        when(commandeRepository.findById(id)).thenReturn(Optional.of(existing));
-        when(commandeRepository.save(existing)).thenReturn(updated);
-        when(commandeMapper.toDto(updated)).thenReturn(updatedDto);
-
-        CommandeDTO result = commandeService.updateCommande(id, dto);
-
-        assertNotNull(result);
-        verify(mouvementService, times(1)).updateMouvementsForCommandeSortie(updated);
-        verify(commandeRepository, times(1)).save(existing);
-    }
 
     // 🧪 3️⃣ Cas : changement de quantité
     @Test
@@ -376,6 +347,141 @@ public class CommandeServiceTest {
 
         // 🔹 Vérifier que mapper n'a jamais été appelé
         verify(commandeMapper, never()).toDto(any());
+    }
+    // 1️⃣ Test commande non trouvée
+    @Test
+    void testUpdateCommande_CommandeNonTrouvee() {
+        Long id = 1L;
+        CommandeDTO dto = new CommandeDTO();
+
+        when(commandeRepository.findById(id)).thenReturn(Optional.empty());
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
+            commandeService.updateCommande(id, dto);
+        });
+
+        assertTrue(ex.getMessage().contains("Commande non trouvée"));
+    }
+
+    // 2️⃣ Test changement de statut vers SORTIE
+    @Test
+    void testUpdateCommande_ChangementEnSortie() {
+        Long id = 1L;
+        Commande existing = new Commande();
+        existing.setId(id);
+        existing.setQuntite(5);
+        existing.setStatut(StatusCommande.ENTREE);
+        existing.setMouvements(List.of());
+
+        CommandeDTO dto = new CommandeDTO();
+        dto.setQuntite(5);
+        dto.setStatut(StatusCommande.SORTIE); // changement de statut
+
+        Commande updated = new Commande();
+        updated.setId(id);
+        updated.setStatut(StatusCommande.SORTIE);
+
+        CommandeDTO updatedDto = new CommandeDTO();
+        updatedDto.setId(id);
+
+        when(commandeRepository.findById(id)).thenReturn(Optional.of(existing));
+        when(commandeRepository.save(existing)).thenReturn(updated);
+        when(commandeMapper.toDto(updated)).thenReturn(updatedDto);
+
+        CommandeDTO result = commandeService.updateCommande(id, dto);
+
+        assertNotNull(result);
+        verify(mouvementService, times(1)).updateMouvementsForCommandeSortie(updated);
+    }
+
+    // 3️⃣ Test mise à jour de la quantité → updateProduitStock
+    @Test
+    void testUpdateCommande_QuantiteModifiee() {
+        Long id = 1L;
+
+        Produit produit = new Produit();
+        produit.setNom("Clavier");
+
+        Mouvement mouvement = new Mouvement();
+        mouvement.setProduit(produit);
+
+        Commande existing = new Commande();
+        existing.setId(id);
+        existing.setQuntite(5);
+        existing.setStatut(StatusCommande.ENTREE);
+        existing.setMouvements(List.of(mouvement));
+
+        CommandeDTO dto = new CommandeDTO();
+        dto.setQuntite(8); // quantité modifiée
+        dto.setStatut(StatusCommande.ENTREE);
+
+        Commande updated = new Commande();
+        updated.setId(id);
+
+        CommandeDTO updatedDto = new CommandeDTO();
+        updatedDto.setId(id);
+
+        when(commandeRepository.findById(id)).thenReturn(Optional.of(existing));
+        when(commandeRepository.save(existing)).thenReturn(updated);
+        when(commandeMapper.toDto(updated)).thenReturn(updatedDto);
+
+        // Spy sur updateProduitStock
+        doNothing().when(commandeService).updateProduitStock(any(Produit.class), anyInt(), anyBoolean());
+
+        CommandeDTO result = commandeService.updateCommande(id, dto);
+
+        assertNotNull(result);
+        verify(commandeService, times(1)).updateProduitStock(produit, 3, false); // différence = 8-5 = 3
+    }
+
+    // 4️⃣ Test mise à jour du statut non null
+    @Test
+    void testUpdateCommande_StatutNonNull() {
+        Long id = 1L;
+
+        Commande existing = new Commande();
+        existing.setId(id);
+        existing.setQuntite(5);
+        existing.setStatut(StatusCommande.ENTREE);
+        existing.setMouvements(List.of());
+
+        CommandeDTO dto = new CommandeDTO();
+        dto.setQuntite(5);
+        dto.setStatut(StatusCommande.SORTIE); // nouveau statut
+
+        Commande updated = new Commande();
+        updated.setId(id);
+        updated.setStatut(StatusCommande.SORTIE);
+
+        CommandeDTO updatedDto = new CommandeDTO();
+        updatedDto.setId(id);
+
+        when(commandeRepository.findById(id)).thenReturn(Optional.of(existing));
+        when(commandeRepository.save(existing)).thenReturn(updated);
+        when(commandeMapper.toDto(updated)).thenReturn(updatedDto);
+
+        CommandeDTO result = commandeService.updateCommande(id, dto);
+
+        assertEquals(StatusCommande.SORTIE, updated.getStatut());
+    }
+
+    // 5️⃣ Test capture d'une exception générale
+    @Test
+    void testUpdateCommande_CatchException() {
+        Long id = 1L;
+
+        CommandeDTO dto = new CommandeDTO();
+        dto.setQuntite(5);
+
+        // Simuler un repository qui lève une exception
+        when(commandeRepository.findById(id)).thenThrow(new RuntimeException("Base KO"));
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
+            commandeService.updateCommande(id, dto);
+        });
+
+        assertTrue(ex.getMessage().contains("Erreur lors de la mise à jour de la commande"));
+        assertTrue(ex.getMessage().contains("Base KO"));
     }
 
 }

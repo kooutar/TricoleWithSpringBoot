@@ -12,6 +12,7 @@ Après la mise en place du module de gestion des fournisseurs, un nouveau module
 - Gérer l’ensemble du **cycle de vie des commandes fournisseurs** : création, suivi, validation, annulation.
 - Assurer la **mise à jour automatique du stock** et le **calcul du coût réel** selon les méthodes **FIFO** ou **CUMP**.
 - Mettre en place un système **documenté et maintenable**, respectant les bonnes pratiques de l’architecture Spring Boot.
+- Mettre en place un module **testé, maintenable et documenté**.
 
 ---
 
@@ -70,6 +71,63 @@ L’application suit une **architecture en couches** claire :
 - Tri, recherche et navigation par page.
 
 ---
+
+## 🧪 Types de tests
+
+### ✔️ Tests unitaires
+Portent sur :
+- Services
+- Méthodes métier
+- Validations
+
+Utilisent :
+- Mockito
+- Mocked Beans
+
+
+### ✔️ Architecture de teste
+
+![img_5.png](img_5.png)
+
+### ✔️ Tests d’intégration
+Portent sur :
+- Endpoints REST
+- Base de test (H2/Testcontainers)
+- Couche Repository + Service + Controller
+
+Utilisent :
+- @SpringBootTest
+- @AutoConfigureMockMvc
+
+## 📊 JaCoCo – Rapport de couverture
+
+Pour générer le rapport :
+mvn clean verify
+
+Le rapport est disponible dans :
+target/site/jacoco/index.html
+
+Objectif : ≥ 70% de couverture.
+![img_6.png](img_6.png)
+
+## ▶️ Lancement des tests
+
+Exécuter les tests :
+mvn test
+
+Avec JaCoCo :
+mvn clean verify
+
+Avec Testcontainers :
+mvn test -Ptestcontainers
+
+## 📝 Bonnes pratiques
+- Un test = un comportement
+- Utiliser Given / When / Then
+- Tester les erreurs aussi
+- Noms explicites : shouldCreateCommande_whenValidInput()
+- Ne pas tester les repositories seuls
+
 
 ## 🧪 Tests des Endpoints
 

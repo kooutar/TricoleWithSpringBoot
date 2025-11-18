@@ -60,7 +60,7 @@ public class FournisseurService {
          Optional<Fournisseur> fournisseurById=repo.findById(id);
          if(fournisseurById.isPresent()){
              repo.delete(fournisseurById.get());
-             return "delete with succes";
+             return "delete with success";
          }
          return "supplier don't exist";
     }
